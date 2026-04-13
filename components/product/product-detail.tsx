@@ -1,6 +1,6 @@
 import { Product } from "./product-card"; // Menggunakan interface dari langkah sebelumnya
 import { Button } from "@/components/ui/button";
-
+import { ProductActions } from "./product-actions";
 // TODO: Ganti dengan fetch asli ke Supabase berdasarkan slug
 async function getProductBySlug(slug: string): Promise<Product | null> {
   // Simulasi loading 2 detik untuk melihat skeleton
@@ -8,8 +8,8 @@ async function getProductBySlug(slug: string): Promise<Product | null> {
 
   return {
     id: "1",
-    brand: "New Balance",
-    name: "New Balance 204L Pastel Pink",
+    brand: "Vans Authentic",
+    name: "Vans Authentic (Maroon/Burgundy)",
     price: 2290000,
     imageUrl: "https://via.placeholder.com/600x600?text=Shoe+1",
     slug: slug,

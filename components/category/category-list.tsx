@@ -8,31 +8,31 @@ async function getCategories() {
   return [
     {
       id: 1,
-      name: "T-Shirts",
+      name: "Old Skool",
       slug: "t-shirts",
       description: "Graphic tees and basics.",
-      imageurl: "/1.jpg",
+      imageurl: "/10.jpg",
     },
     {
       id: 2,
-      name: "Hoodies & Sweaters",
+      name: "Authentic",
       slug: "hoodies",
       description: "Stay warm with our thick hoodies.",
       imageurl: "/1.jpg",
     },
     {
       id: 3,
-      name: "Outerwear",
+      name: "Era",
       slug: "outerwear",
       description: "Jackets, flannels, and windbreakers.",
-      imageurl: "/1.jpg",
+      imageurl: "/11.jpg",
     },
     {
       id: 4,
-      name: "Accessories",
+      name: "Classic Slip-On",
       slug: "accessories",
       description: "Caps, beanies, and bags.",
-      imageurl: "/1.jpg",
+      imageurl: "/12.jpg",
     },
   ];
 }
