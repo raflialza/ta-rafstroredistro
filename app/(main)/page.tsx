@@ -10,7 +10,7 @@ export default function Home() {
     <main className="min-h-screen flex flex-col items-center">
       <div className="flex-1 w-full flex flex-col gap-10 items-center">
         {/* Navigasi Atas Sederhana */}
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
+        {/* <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
           <div className="w-full max-w-7xl flex justify-between items-center p-3 px-5 text-sm">
             <div className="flex gap-5 items-center font-bold text-lg tracking-wider uppercase">
               RAFSTROREDISTRO.ID
@@ -19,14 +19,14 @@ export default function Home() {
               <AuthButton />
             </Suspense>
           </div>
-        </nav>
+        </nav> */}
 
         {/* Konten Utama */}
         <div className="flex flex-col gap-10 mb-10 max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               Shop by Category
-            </h1>
+            </h2>
             <p className="text-muted-foreground text-lg">
               Find the latest distro drops and exclusive collections.
             </p>
@@ -41,11 +41,11 @@ export default function Home() {
         <div className="flex-1 w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
           <div className="flex flex-col gap-8">
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 Koleksi Terbaru
-              </h1>
+              </h2>
               <p className="text-muted-foreground text-lg">
-                Temukan *sneakers* dan *apparel* paling tren minggu ini.
+                Temukan sneakers paling tren minggu ini.
               </p>
             </div>
 
