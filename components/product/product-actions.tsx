@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation"; // 1. Import useRouter
+import { createClient } from "@/lib/supabase/client"; // 2. Import Supabase Client
 
 interface ProductActionsProps {
   productId: string;
@@ -13,13 +15,53 @@ export function ProductActions({
   availableSizes,
 }: ProductActionsProps) {
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false); // Tambahan state loading agar tombol tidak diklik 2x
+  const router = useRouter();
 
-  const handleAddToCart = () => {
+  // 3. Ubah fungsi ini menjadi async
+  const handleAddToCart = async () => {
     if (!selectedSize) {
       alert("Pilih ukuran terlebih dahulu!");
       return;
     }
-    alert(`Produk dengan ukuran ${selectedSize} berhasil ditambahkan!`);
+
+    setIsLoading(true); // Nyalakan efek loading
+
+    try {
+      const supabase = createClient();
+
+      // Cek apakah pengguna sudah login
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        alert("Kamu harus login terlebih dahulu untuk berbelanja.");
+        router.push("/auth/login"); // Arahkan ke halaman login
+        return;
+      }
+
+      // Masukkan data ke tabel cart_items
+      const { error } = await supabase.from("cart_items").insert({
+        user_id: user.id,
+        product_id: productId, // Menggunakan ID produk yang sedang dilihat
+        size: selectedSize, // Menggunakan ukuran yang dipilih
+        quantity: 1, // Jumlah bawaan adalah 1
+      });
+
+      if (error) {
+        console.error("Gagal memasukkan ke keranjang:", error.message);
+        alert("Ups, terjadi kesalahan saat menambahkan ke keranjang.");
+      } else {
+        // Jika sukses, arahkan ke halaman keranjang dan refresh data
+        router.push("/cart");
+        router.refresh();
+      }
+    } catch (err) {
+      console.error("Error:", err);
+    } finally {
+      setIsLoading(false); // Matikan efek loading
+    }
   };
 
   return (
@@ -34,12 +76,13 @@ export function ProductActions({
             <button
               key={size}
               onClick={() => setSelectedSize(size)}
+              disabled={isLoading}
               className={`py-3 text-sm font-medium rounded-md border transition-all 
                 ${
                   selectedSize === size
                     ? "border-black bg-black text-white"
                     : "border-muted-foreground/30 hover:border-black bg-transparent"
-                }`}
+                } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               {size}
             </button>
@@ -49,12 +92,15 @@ export function ProductActions({
 
       <Button
         size="lg"
-        className="w-full text-base font-semibold h-14"
+        className="w-full text-base font-semibold h-14 transition-all"
         onClick={handleAddToCart}
+        disabled={isLoading} // Tombol mati saat proses loading ke database
       >
-        {selectedSize
-          ? `Tambah Ukuran ${selectedSize} ke Keranjang`
-          : "Pilih Ukuran"}
+        {isLoading
+          ? "Menambahkan..."
+          : selectedSize
+            ? `Tambah Ukuran ${selectedSize} ke Keranjang`
+            : "Pilih Ukuran"}
       </Button>
     </div>
   );

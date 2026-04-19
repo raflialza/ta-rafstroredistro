@@ -1,28 +1,31 @@
-import { Product } from "./product-card"; // Menggunakan interface dari langkah sebelumnya
-import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { notFound } from "next/navigation";
 import { ProductActions } from "./product-actions";
-// TODO: Ganti dengan fetch asli ke Supabase berdasarkan slug
-async function getProductBySlug(slug: string): Promise<Product | null> {
-  // Simulasi loading 2 detik untuk melihat skeleton
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+// 1. Import Supabase Client khusus untuk komponen server
+import { createClient } from "@/lib/supabase/server"; // <-- Pastikan ini adalah client untuk server, bukan untuk client-side
 
-  return {
-    id: "1",
-    brand: "Vans Authentic",
-    name: "Vans Authentic (Maroon/Burgundy)",
-    price: 2290000,
-    imageUrl: "https://via.placeholder.com/600x600?text=Shoe+1",
-    slug: slug,
-  };
+interface ProductDetailProps {
+  slug: string;
 }
 
-export async function ProductDetail({ slug }: { slug: string }) {
-  const product = await getProductBySlug(slug);
+export async function ProductDetail({ slug }: ProductDetailProps) {
+  // 2. Inisialisasi koneksi ke Supabase
+  const supabase = await createClient();
 
-  if (!product) {
-    return <div>Produk tidak ditemukan.</div>;
+  // 3. Ambil data asli dari tabel "products" berdasarkan slug
+  const { data: product, error } = await supabase
+    .from("products") // Pastikan nama tabel ini sesuai dengan yang ada di Supabasemu
+    .select("*")
+    .eq("slug", slug) // Cari produk dimana kolom 'slug' bernilai sama dengan parameter {slug}
+    .single(); // Ambil satu data saja, bukan dalam bentuk array
+
+  // Jika error dari database atau produk tidak ditemukan
+  if (error || !product) {
+    console.error("Error fetching product:", error);
+    notFound();
   }
 
+  // Format harga
   const formatIDR = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -32,47 +35,43 @@ export async function ProductDetail({ slug }: { slug: string }) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-      {/* Container Gambar */}
-      <div className="aspect-square w-full bg-[#f8f9fa] rounded-xl overflow-hidden flex items-center justify-center p-8">
+    <div className="grid md:grid-cols-2 gap-10 items-start">
+      {/* Gambar Produk */}
+      <div className="bg-[#f8f9fa] rounded-xl p-8 flex justify-center items-center relative aspect-square">
+        {/* Catatan: Jika di Supabase nama kolom gambarmu adalah 'image_url', 
+            ganti product.imageUrl di bawah ini menjadi product.image_url */}
         <img
-          src={product.imageUrl}
+          src={product.imageUrl || product.image_url}
           alt={product.name}
-          className="object-contain w-full h-full mix-blend-multiply"
+          className="w-full h-full object-contain mix-blend-multiply"
         />
       </div>
 
-      {/* Container Detail */}
-      <div className="flex flex-col pt-4">
-        <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+      {/* Info Produk */}
+      <div className="flex flex-col gap-4">
+        <h2 className="text-muted-foreground font-semibold tracking-widest uppercase">
           {product.brand}
-        </span>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-          {product.name}
-        </h1>
+        </h2>
+        <h1 className="text-3xl md:text-4xl font-bold">{product.name}</h1>
 
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-4 mt-2">
           <span className="text-2xl font-bold text-[#10b981]">
             {formatIDR(product.price)}
           </span>
-          {product.originalPrice && (
-            <span className="text-lg font-medium text-muted-foreground line-through decoration-muted-foreground/50">
-              {formatIDR(product.originalPrice)}
+          {/* Catatan: Sama seperti gambar, jika di DB pakai 'original_price', ganti kode di bawah */}
+          {(product.originalPrice || product.original_price) && (
+            <span className="text-lg text-muted-foreground line-through">
+              {formatIDR(product.originalPrice || product.original_price)}
             </span>
           )}
         </div>
 
-        <p className="text-muted-foreground mb-8 leading-relaxed">
-          Ini adalah deskripsi produk tiruan. Di sini kamu bisa menjelaskan
-          detail material, ukuran, atau cerita di balik perilisan produk ini.
-          Sepatu ini sangat nyaman digunakan untuk gaya kasual sehari-hari.
-        </p>
-
-        <div className="mt-auto">
-          <Button size="lg" className="w-full text-base font-semibold">
-            Tambah ke Keranjang
-          </Button>
-        </div>
+        {/* Tombol Add to Cart & Pilihan Size */}
+        {/* Pastikan product.id di bawah ini sesuai dengan primary key di Supabase-mu */}
+        <ProductActions
+          productId={product.id}
+          availableSizes={[39, 40, 41, 42, 43]}
+        />
       </div>
     </div>
   );

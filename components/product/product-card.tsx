@@ -1,18 +1,18 @@
 import Link from "next/link";
 import Image from "next/image";
+import { ImageIcon } from "lucide-react"; // Import ikon untuk fallback
 
 export interface Product {
   id: string;
   brand: string;
   name: string;
   price: number;
-  originalPrice?: number; // Opsional untuk produk diskon
-  imageUrl: string;
+  originalPrice?: number;
+  imageUrl?: string | null; // Ubah tipe data agar mengizinkan null atau kosong
   slug: string;
 }
 
 export function ProductCard({ product }: { product: Product }) {
-  // Format angka ke format mata uang Rupiah
   const formatIDR = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -27,13 +27,24 @@ export function ProductCard({ product }: { product: Product }) {
       className="group flex flex-col gap-3 cursor-pointer"
     >
       {/* Container Gambar */}
-      <div className="relative aspect-square w-full bg-[#f8f9fa] rounded-lg overflow-hidden flex items-center justify-center p-4 transition-transform group-hover:scale-[1.02]">
-        {/* Fallback image menggunakan warna jika gambar asli tidak ada */}
-        <img
-          src={product.imageUrl}
-          alt={product.name}
-          className="object-contain w-full h-full mix-blend-multiply"
-        />
+      <div className="relative aspect-square w-full bg-muted/40 rounded-lg overflow-hidden flex items-center justify-center transition-transform group-hover:scale-[1.02]">
+        {/* Pengecekan: Jika ada imageUrl, tampilkan gambar. Jika tidak, tampilkan fallback */}
+        {product.imageUrl ? (
+          <Image
+            src={product.imageUrl}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            className="object-contain p-4 mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center text-muted-foreground opacity-50 transition-opacity group-hover:opacity-80">
+            <ImageIcon className="h-12 w-12 mb-2" strokeWidth={1.5} />
+            <span className="text-[10px] font-semibold uppercase tracking-widest">
+              Belum Ada Gambar
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Detail Produk */}
