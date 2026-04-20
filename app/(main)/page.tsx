@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { ProductList } from "@/components/product/product-list";
 import { ProductListSkeleton } from "@/components/product/product-skeleton";
-import { AuthButton } from "@/components/auth-button";
 import { CategoryList } from "@/components/category/category-list";
 import { CategorySkeleton } from "@/components/category/category-skeleton";
 
@@ -9,20 +8,11 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center">
       <div className="flex-1 w-full flex flex-col gap-10 items-center">
-        {/* Navigasi Atas Sederhana */}
-        {/* <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-7xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-5 items-center font-bold text-lg tracking-wider uppercase">
-              RAFSTROREDISTRO.ID
-            </div>
-            <Suspense>
-              <AuthButton />
-            </Suspense>
-          </div>
-        </nav> */}
-
-        {/* Konten Utama */}
-        <div className="flex flex-col gap-10 mb-10 max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
+        {/* Bagian Kategori (Tetap Sama) */}
+        <div
+          id="categories"
+          className="flex flex-col gap-10 mt-8 mb-10 w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 scroll-mt-24"
+        >
           <div className="space-y-2">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               Shop by Category
@@ -32,26 +22,29 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Suspense boundary will show the skeleton until CategoryList finishes fetching */}
           <Suspense fallback={<CategorySkeleton />}>
             <CategoryList />
           </Suspense>
         </div>
 
-        <div className="flex-1 w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
+        {/* Bagian Koleksi Terbaru (Layout Tetap, Hanya Isinya Jadi Carousel) */}
+        <div
+          id="products"
+          className="flex-1 w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 scroll-mt-24"
+        >
           <div className="flex flex-col gap-8">
             <div className="space-y-2">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Koleksi Terbaru
+                latest collection
               </h2>
               <p className="text-muted-foreground text-lg">
-                Temukan sneakers paling tren minggu ini.
+                Find the latest sneaker drops of the week.
               </p>
             </div>
 
-            {/* Suspense boundary akan menampilkan skeleton sampai ProductList selesai memuat data */}
+            {/* Di sini kita tambahkan isCarousel={true} */}
             <Suspense fallback={<ProductListSkeleton />}>
-              <ProductList />
+              <ProductList isCarousel={true} />
             </Suspense>
           </div>
         </div>

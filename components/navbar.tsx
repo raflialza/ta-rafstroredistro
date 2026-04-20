@@ -45,17 +45,17 @@ export async function Navbar() {
           <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-sm font-medium">
             {/* Ubah href ke /products agar mengarah ke daftar sepatu */}
             <Link
-              href="/products"
+              href="/#products"
               className="relative group text-foreground/80 hover:text-foreground transition-colors"
             >
-              Produk
+              Products
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-red-600 transition-all group-hover:w-full" />
             </Link>
             <Link
-              href="/categories"
+              href="/#categories"
               className="relative group text-foreground/80 hover:text-foreground transition-colors"
             >
-              Kategori
+              Categories
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-red-600 transition-all group-hover:w-full" />
             </Link>
           </nav>

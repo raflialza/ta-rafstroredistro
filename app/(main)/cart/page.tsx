@@ -125,7 +125,7 @@ export default async function CartPage() {
             </div>
 
             <div className="flex justify-between items-center mb-6 text-muted-foreground">
-              <span>Ongkos Kirim</span>
+              <span>Biaya Kirim</span>
               <span className="font-medium text-foreground">
                 Dihitung saat checkout
               </span>
