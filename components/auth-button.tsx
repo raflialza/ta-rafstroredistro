@@ -6,14 +6,20 @@ import { LogoutButton } from "./logout-button";
 export async function AuthButton() {
   const supabase = await createClient();
 
-  // You can also use getUser() which will be slower.
   const { data } = await supabase.auth.getClaims();
-
   const user = data?.claims;
+
+  // Mengambil huruf pertama dari email untuk dijadikan inisial
+  // Jika tidak ada email, gunakan 'U' (User) sebagai cadangan
+  const initial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
 
   return user ? (
     <div className="flex items-center gap-4">
-      Hey, {user.email}!
+      {/* Avatar Inisial */}
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-sm font-bold text-white uppercase">
+        {initial}
+      </div>
+
       <LogoutButton />
     </div>
   ) : (
