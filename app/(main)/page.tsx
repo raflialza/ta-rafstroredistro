@@ -3,11 +3,15 @@ import { ProductList } from "@/components/product/product-list";
 import { ProductListSkeleton } from "@/components/product/product-skeleton";
 import { CategoryList } from "@/components/category/category-list";
 import { CategorySkeleton } from "@/components/category/category-skeleton";
+import { HeroSection } from "@/components/hero/hero-section";
 
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center">
       <div className="flex-1 w-full flex flex-col gap-10 items-center">
+        {/* Bagian Hero Banner */}
+        <HeroSection />
+
         {/* Bagian Kategori (Tetap Sama) */}
         <div
           id="categories"

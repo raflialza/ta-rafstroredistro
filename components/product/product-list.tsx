@@ -1,9 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "./product-card";
 
-export async function ProductList() {
+export async function ProductList({
+  categoryId,
+  isCarousel = false,
+}: {
+  categoryId?: string | number;
+  isCarousel?: boolean;
+} = {}) {
   const supabase = await createClient();
-  const { data: dbProducts } = await supabase.from("products").select("*");
+  
+  let query = supabase.from("products").select("*");
+  
+  if (categoryId) {
+    query = query.eq("category_id", categoryId);
+  }
+
+  const { data: dbProducts } = await query;
 
   // Format the data so your ProductCard understands it
   const products =

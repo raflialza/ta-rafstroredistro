@@ -1,16 +1,16 @@
 "use client";
 
 import { useRef } from "react";
-import { ProductCard, type Product } from "./product-card";
+import { ProductCard } from "./product-card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export function ProductCarousel({ products }: { products: Product[] }) {
+export function ProductCarousel({ products }: { products: any[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
-      const scrollAmount = 400; // Jarak geser
+      const scrollAmount = 400; // Jarak geser per klik
       scrollRef.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -20,39 +20,39 @@ export function ProductCarousel({ products }: { products: Product[] }) {
 
   return (
     <div className="relative group w-full">
-      {/* Tombol Panah Kiri */}
+      {/* Tombol Kiri */}
       <Button
-        variant="secondary"
+        variant="outline"
         size="icon"
-        className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 md:-ml-6 z-10 rounded-full shadow-xl opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex bg-white/90 border-none hover:bg-white"
+        className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-20 rounded-full bg-white shadow-xl opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex border-none hover:bg-red-50 text-red-600"
         onClick={() => scroll("left")}
       >
-        <ChevronLeft className="h-6 w-6 text-black" />
+        <ChevronLeft className="h-6 w-6" />
       </Button>
 
-      {/* Barisan Produk */}
+      {/* Kontainer Produk */}
       <div
         ref={scrollRef}
-        className="flex gap-4 sm:gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-6 pt-2 px-1"
+        className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-6 pt-2 px-1"
       >
         {products.map((product) => (
           <div
             key={product.id}
-            className="min-w-[200px] xs:min-w-[230px] md:min-w-[280px] snap-start flex-shrink-0"
+            className="min-w-[280px] snap-start flex-shrink-0"
           >
             <ProductCard product={product} />
           </div>
         ))}
       </div>
 
-      {/* Tombol Panah Kanan */}
+      {/* Tombol Kanan */}
       <Button
-        variant="secondary"
+        variant="outline"
         size="icon"
-        className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 md:-mr-6 z-10 rounded-full shadow-xl opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex bg-white/90 border-none hover:bg-white"
+        className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-20 rounded-full bg-white shadow-xl opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex border-none hover:bg-red-50 text-red-600"
         onClick={() => scroll("right")}
       >
-        <ChevronRight className="h-6 w-6 text-black" />
+        <ChevronRight className="h-6 w-6" />
       </Button>
     </div>
   );
