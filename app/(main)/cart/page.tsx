@@ -114,7 +114,7 @@ export default async function CartPage() {
           {/* Ringkasan Harga di Kanan */}
           <div className="bg-muted/30 p-6 rounded-xl border sticky top-24">
             <h2 className="text-xl font-bold mb-6 border-b pb-4">
-              Ringkasan Pesanan
+              Order Summary
             </h2>
 
             <div className="flex justify-between items-center mb-4 text-muted-foreground">
@@ -138,8 +138,11 @@ export default async function CartPage() {
               </span>
             </div>
 
-            <Button className="w-full h-12 bg-black hover:bg-black/80 text-white font-bold text-lg rounded-xl transition-all">
-              CHECKOUT SEKARANG
+            <Button
+              asChild
+              className="w-full h-12 bg-black hover:bg-black/80 text-white font-bold text-lg rounded-xl transition-all"
+            >
+              <Link href="/checkout">CHECKOUT NOW</Link>
             </Button>
           </div>
         </div>
