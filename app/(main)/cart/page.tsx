@@ -59,7 +59,7 @@ export default async function CartPage() {
   return (
     <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
       <h1 className="text-3xl font-black italic mb-8 uppercase">
-        Keranjang Belanja
+        Shopping Cart
       </h1>
 
       {/* Jika keranjang ada isinya */}
