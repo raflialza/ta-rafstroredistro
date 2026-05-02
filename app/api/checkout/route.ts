@@ -74,6 +74,9 @@ export async function POST(req: Request) {
         email: user.email,
         phone: phone,
       },
+      callbacks: {
+        finish: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/checkout/success`
+      }
     };
 
     const transaction = await snap.createTransaction(parameter);
