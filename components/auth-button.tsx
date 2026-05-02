@@ -15,10 +15,16 @@ export async function AuthButton() {
 
   return user ? (
     <div className="flex items-center gap-4">
+      <Button asChild variant="ghost" size="sm" className="hidden md:flex font-semibold">
+        <Link href="/orders">Pesanan Saya</Link>
+      </Button>
+
       {/* Avatar Inisial */}
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-sm font-bold text-white uppercase">
-        {initial}
-      </div>
+      <Link href="/orders">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-sm font-bold text-white uppercase hover:ring-2 hover:ring-red-600 hover:ring-offset-2 transition-all">
+          {initial}
+        </div>
+      </Link>
 
       <LogoutButton />
     </div>

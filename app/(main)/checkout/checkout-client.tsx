@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,8 +42,22 @@ export function CheckoutClient({
 }) {
   const router = useRouter();
 
-  const [paymentMethod, setPaymentMethod] = useState<string>("bank_transfer");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const snapScript = "https://app.sandbox.midtrans.com/snap/snap.js";
+    const clientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || "";
+    const script = document.createElement("script");
+    script.src = snapScript;
+    script.setAttribute("data-client-key", clientKey);
+    script.async = true;
+
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   // --- STATE UNTUK ALAMAT BERJENJANG ---
   const [phone, setPhone] = useState("");
@@ -79,14 +93,56 @@ export function CheckoutClient({
     }
 
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    const alamatLengkap = `${detailAddress}, Kec. ${district}, ${city}, ${province} ${postalCode}`;
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone,
+          province,
+          city,
+          district,
+          postalCode,
+          detailAddress,
+          subtotal,
+          totalItems,
+        }),
+      });
 
-    alert(
-      `Pesanan berhasil!\n\nDikirim ke:\n${alamatLengkap}\n\nTelepon: ${phone}\nTotal: ${formatIDR(totalTagihan)}\nMetode: ${paymentMethod}`,
-    );
-    setIsLoading(false);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Gagal memproses pembayaran");
+      }
+
+      // Panggil Snap
+      // @ts-expect-error - window.snap is injected by Midtrans script
+      window.snap.pay(data.token, {
+        onSuccess: function (result: any) {
+          console.log("success", result);
+          router.push(`/checkout/success?order_id=${data.orderId}`);
+        },
+        onPending: function (result: any) {
+          console.log("pending", result);
+          router.push(`/checkout/success?order_id=${data.orderId}&status=pending`);
+        },
+        onError: function (result: any) {
+          console.log("error", result);
+          alert("Pembayaran gagal!");
+          setIsLoading(false);
+        },
+        onClose: function () {
+          console.log("customer closed the popup");
+          alert("Anda menutup popup sebelum menyelesaikan pembayaran.");
+          setIsLoading(false);
+        },
+      });
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -215,125 +271,7 @@ export function CheckoutClient({
           </div>
         </div>
 
-        {/* --- 2. PILIH METODE PEMBAYARAN --- */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-semibold border-b pb-2">
-            Select Payment Method
-          </h2>
 
-          <div className="space-y-4">
-            {/* Transfer Bank */}
-            <div className="space-y-3">
-              <label
-                className={`flex items-center justify-between p-4 border rounded-xl cursor-pointer transition-all ${paymentMethod === "bank_transfer" ? "border-black bg-zinc-50 ring-1 ring-black" : "hover:bg-zinc-50"}`}
-              >
-                <div className="flex items-center gap-4">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="bank_transfer"
-                    checked={paymentMethod === "bank_transfer"}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-4 h-4 text-black focus:ring-black"
-                  />
-                  <div>
-                    <p className="font-bold text-sm">Transfer Bank (BCA)</p>
-                    <p className="text-xs text-muted-foreground">
-                      Otomatis dicek sistem
-                    </p>
-                  </div>
-                </div>
-                <CreditCard className="text-muted-foreground w-6 h-6" />
-              </label>
-
-              {paymentMethod === "bank_transfer" && (
-                <div className="p-5 bg-blue-50 border border-blue-200 rounded-xl animate-in slide-in-from-top-2">
-                  <p className="text-sm text-blue-800 mb-2 font-medium">
-                    Nomor Virtual Account Anda:
-                  </p>
-                  <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-blue-100">
-                    <span className="font-mono text-2xl font-black tracking-wider text-blue-950">
-                      8077 1234 5678
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-blue-700 border-blue-200 hover:bg-blue-100"
-                    >
-                      Salin
-                    </Button>
-                  </div>
-                  <p className="text-xs text-blue-600 mt-3">
-                    Silakan transfer sesuai total tagihan. Verifikasi otomatis
-                    dalam 1-5 menit.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* E-WALLET / QRIS */}
-            <div className="space-y-3">
-              <label
-                className={`flex items-center justify-between p-4 border rounded-xl cursor-pointer transition-all ${paymentMethod === "ewallet" ? "border-black bg-zinc-50 ring-1 ring-black" : "hover:bg-zinc-50"}`}
-              >
-                <div className="flex items-center gap-4">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="ewallet"
-                    checked={paymentMethod === "ewallet"}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-4 h-4 text-black focus:ring-black"
-                  />
-                  <div>
-                    <p className="font-bold text-sm">QRIS / E-Wallet</p>
-                    <p className="text-xs text-muted-foreground">
-                      GoPay, OVO, Dana, ShopeePay
-                    </p>
-                  </div>
-                </div>
-                <Wallet className="text-muted-foreground w-6 h-6" />
-              </label>
-
-              {paymentMethod === "ewallet" && (
-                <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-xl flex flex-col items-center text-center animate-in slide-in-from-top-2">
-                  <p className="text-sm text-emerald-800 font-medium mb-4">
-                    Scan QRIS di bawah ini menggunakan aplikasi E-Wallet
-                    pilihanmu:
-                  </p>
-                  <div className="bg-white p-4 rounded-xl border-2 border-dashed border-emerald-300 shadow-sm">
-                    <QrCode className="w-40 h-40 text-emerald-950" />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* COD */}
-            <div className="space-y-3">
-              <label
-                className={`flex items-center justify-between p-4 border rounded-xl cursor-pointer transition-all ${paymentMethod === "cod" ? "border-black bg-zinc-50 ring-1 ring-black" : "hover:bg-zinc-50"}`}
-              >
-                <div className="flex items-center gap-4">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="cod"
-                    checked={paymentMethod === "cod"}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-4 h-4 text-black focus:ring-black"
-                  />
-                  <div>
-                    <p className="font-bold text-sm">Bayar di Tempat (COD)</p>
-                    <p className="text-xs text-muted-foreground">
-                      Siapkan uang tunai saat kurir tiba
-                    </p>
-                  </div>
-                </div>
-                <Truck className="text-muted-foreground w-6 h-6" />
-              </label>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* --- KANAN: RINGKASAN BELANJA --- */}
@@ -366,7 +304,7 @@ export function CheckoutClient({
             onClick={handleProcessPayment}
             disabled={isLoading}
           >
-            {isLoading ? "Memproses..." : "Saya Sudah Bayar"}
+            {isLoading ? "Memproses..." : "Bayar Sekarang"}
           </Button>
         </div>
       </div>
