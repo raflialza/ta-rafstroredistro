@@ -25,6 +25,21 @@ export async function ProductDetail({ slug }: ProductDetailProps) {
     notFound();
   }
 
+  // Cek apakah user saat ini sudah pernah membeli produk ini (status = 'paid')
+  const { data: { user } } = await supabase.auth.getUser();
+  let isPurchased = false;
+
+  if (user && product) {
+    const { data: purchaseData } = await supabase
+      .from("order_items")
+      .select("id, orders!inner(user_id, status)")
+      .eq("product_id", product.id)
+      .eq("orders.user_id", user.id)
+      .eq("orders.status", "paid");
+
+    isPurchased = !!(purchaseData && purchaseData.length > 0);
+  }
+
   // Format harga
   const formatIDR = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -71,6 +86,8 @@ export async function ProductDetail({ slug }: ProductDetailProps) {
         <ProductActions
           productId={product.id}
           availableSizes={[39, 40, 41, 42, 43]}
+          isPurchased={isPurchased}
+          stock={product.qty}
         />
       </div>
     </div>

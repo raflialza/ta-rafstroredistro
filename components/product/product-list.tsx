@@ -13,12 +13,23 @@ export async function ProductList({
   limit?: number;
 } = {}) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // Ambil data dan urutkan dari yang terbaru
-  let query = supabase
-    .from("products")
-    .select("*")
-    .order("created_at", { ascending: false });
+  let query;
+  if (user) {
+    query = supabase
+      .rpc("get_available_products", { current_user_id: user.id })
+      .select("*")
+      .order("created_at", { ascending: false });
+  } else {
+    query = supabase
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
+  }
 
   if (categoryId) {
     query = query.eq("category_id", categoryId);
@@ -33,7 +44,7 @@ export async function ProductList({
 
   // Format the data so your ProductCard understands it
   const products =
-    dbProducts?.map((p) => ({
+    (dbProducts as any[])?.map((p: any) => ({
       id: p.id,
       brand: p.brand,
       name: p.name,
@@ -51,7 +62,7 @@ export async function ProductList({
     <div className="flex flex-col items-center gap-10 w-full">
       {/* Tampilan Grid Produk */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 w-full">
-        {products.map((product) => (
+        {products.map((product: any) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>

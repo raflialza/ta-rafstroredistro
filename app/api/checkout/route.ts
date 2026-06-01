@@ -32,10 +32,34 @@ export async function POST(req: Request) {
       subtotal,
     } = body;
 
-    const shippingCost = 50000;
-    const grossAmount = subtotal + shippingCost;
+    // 1. Ambil data keranjang asli pengguna dari database untuk mencegah manipulasi harga
+    const { data: cartItems, error: cartError } = await supabase
+      .from("cart_items")
+      .select(`
+        product_id,
+        quantity,
+        products ( price )
+      `)
+      .eq("user_id", user.id);
 
-    // Insert order to database
+    if (cartError || !cartItems || cartItems.length === 0) {
+      console.error("Keranjang kosong atau error mengambil data keranjang:", cartError);
+      return NextResponse.json(
+        { error: "Keranjang belanja Anda kosong!" },
+        { status: 400 }
+      );
+    }
+
+    // 2. Hitung subtotal dan total harga secara aman di sisi server
+    const dbSubtotal = cartItems.reduce((total, item) => {
+      const price = (item.products as any)?.price || 0;
+      return total + price * item.quantity;
+    }, 0);
+
+    const shippingCost = 50000;
+    const grossAmount = dbSubtotal + shippingCost;
+
+    // 3. Masukkan pesanan ke database (orders)
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
@@ -56,10 +80,32 @@ export async function POST(req: Request) {
       .single();
 
     if (orderError) {
-      console.error("Error creating order:", orderError);
+      console.error("Gagal membuat pesanan:", orderError);
       return NextResponse.json(
-        { error: "Failed to create order" },
+        { error: "Gagal membuat pesanan di database" },
         { status: 500 },
+      );
+    }
+
+    // 4. Masukkan seluruh produk belanjaan ke tabel detail pesanan (order_items)
+    const orderItemsData = cartItems.map((item: any) => ({
+      order_id: order.id,
+      product_id: item.product_id,
+      quantity: item.quantity,
+      price: (item.products as any)?.price || 0,
+    }));
+
+    const { error: itemsError } = await supabase
+      .from("order_items")
+      .insert(orderItemsData);
+
+    if (itemsError) {
+      console.error("Gagal memasukkan rincian pesanan (order_items):", itemsError);
+      // Rollback pembuatan pesanan jika pengisian rincian pesanan gagal
+      await supabase.from("orders").delete().eq("id", order.id);
+      return NextResponse.json(
+        { error: "Gagal memproses rincian pesanan" },
+        { status: 500 }
       );
     }
 

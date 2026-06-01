@@ -8,15 +8,73 @@ import { createClient } from "@/lib/supabase/client"; // 2. Import Supabase Clie
 interface ProductActionsProps {
   productId: string;
   availableSizes: number[];
+  isPurchased?: boolean;
+  stock?: number;
 }
 
 export function ProductActions({
   productId,
   availableSizes,
+  isPurchased = false,
+  stock = 0,
 }: ProductActionsProps) {
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false); // Tambahan state loading agar tombol tidak diklik 2x
   const router = useRouter();
+
+  if (isPurchased) {
+    return (
+      <div className="flex flex-col gap-4 mt-6">
+        <div className="flex items-start gap-3 p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-300 rounded-xl">
+          <svg
+            className="w-6 h-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <div>
+            <p className="font-semibold text-sm sm:text-base">Anda sudah memiliki produk ini</p>
+            <p className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1">Terima kasih telah melakukan pembelian! Akses produk ini dapat dilihat di riwayat pesanan Anda.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (stock === 0) {
+    return (
+      <div className="flex flex-col gap-4 mt-6">
+        <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 text-red-800 dark:text-red-300 rounded-xl">
+          <svg
+            className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <div>
+            <p className="font-semibold text-sm sm:text-base">Stok Habis</p>
+            <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 mt-1">Produk ini sedang tidak tersedia untuk saat ini. Silakan hubungi kami untuk informasi restock.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // 3. Ubah fungsi ini menjadi async
   const handleAddToCart = async () => {
