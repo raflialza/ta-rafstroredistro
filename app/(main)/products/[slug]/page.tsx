@@ -2,10 +2,12 @@ import { Suspense } from "react";
 import { ProductDetail } from "@/components/product/product-detail";
 import { ProductDetailSkeleton } from "@/components/product/product-detail-skeleton";
 
+export const revalidate = 0; // Mematikan cache agar stok produk selalu realtime (tidak stale)
+
 export default async function ProductPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
   // Await params di Next.js versi terbaru (Next 14+)
   const { slug } = await params;

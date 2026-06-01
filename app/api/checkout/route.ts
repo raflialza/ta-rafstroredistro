@@ -37,6 +37,7 @@ export async function POST(req: Request) {
       .from("cart_items")
       .select(`
         product_id,
+        size,
         quantity,
         products ( price )
       `)
@@ -91,6 +92,7 @@ export async function POST(req: Request) {
     const orderItemsData = cartItems.map((item: any) => ({
       order_id: order.id,
       product_id: item.product_id,
+      size: item.size,
       quantity: item.quantity,
       price: (item.products as any)?.price || 0,
     }));

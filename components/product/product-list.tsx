@@ -18,18 +18,10 @@ export async function ProductList({
   } = await supabase.auth.getUser();
 
   // Ambil data dan urutkan dari yang terbaru
-  let query;
-  if (user) {
-    query = supabase
-      .rpc("get_available_products", { current_user_id: user.id })
-      .select("*")
-      .order("created_at", { ascending: false });
-  } else {
-    query = supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
-  }
+  let query = supabase
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   if (categoryId) {
     query = query.eq("category_id", categoryId);

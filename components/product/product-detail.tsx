@@ -12,32 +12,23 @@ export async function ProductDetail({ slug }: ProductDetailProps) {
   // 2. Inisialisasi koneksi ke Supabase
   const supabase = await createClient();
 
-  // 3. Ambil data asli dari tabel "products" berdasarkan slug
+  // 3. Ambil data asli dari tabel "products" beserta stok per ukurannya
   const { data: product, error } = await supabase
-    .from("products") // Pastikan nama tabel ini sesuai dengan yang ada di Supabasemu
-    .select("*")
-    .eq("slug", slug) // Cari produk dimana kolom 'slug' bernilai sama dengan parameter {slug}
-    .single(); // Ambil satu data saja, bukan dalam bentuk array
+    .from("products")
+    .select(`
+      *,
+      product_sizes (
+        size,
+        stock
+      )
+    `)
+    .eq("slug", slug)
+    .single();
 
   // Jika error dari database atau produk tidak ditemukan
   if (error || !product) {
     console.error("Error fetching product:", error);
     notFound();
-  }
-
-  // Cek apakah user saat ini sudah pernah membeli produk ini (status = 'paid')
-  const { data: { user } } = await supabase.auth.getUser();
-  let isPurchased = false;
-
-  if (user && product) {
-    const { data: purchaseData } = await supabase
-      .from("order_items")
-      .select("id, orders!inner(user_id, status)")
-      .eq("product_id", product.id)
-      .eq("orders.user_id", user.id)
-      .eq("orders.status", "paid");
-
-    isPurchased = !!(purchaseData && purchaseData.length > 0);
   }
 
   // Format harga
@@ -85,9 +76,11 @@ export async function ProductDetail({ slug }: ProductDetailProps) {
         {/* Pastikan product.id di bawah ini sesuai dengan primary key di Supabase-mu */}
         <ProductActions
           productId={product.id}
-          availableSizes={[39, 40, 41, 42, 43]}
-          isPurchased={isPurchased}
-          stock={product.qty}
+          sizes={
+            product.product_sizes && product.product_sizes.length > 0 
+              ? product.product_sizes.sort((a: any, b: any) => a.size - b.size) 
+              : []
+          }
         />
       </div>
     </div>
