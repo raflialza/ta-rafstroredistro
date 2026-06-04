@@ -24,11 +24,11 @@ export function CategoryCard({ category }: { category: any }) {
           </p>
           <div className="relative p-4 transition-transform group-hover:scale-[1.02]">
             {/* Fallback image menggunakan warna jika gambar asli tidak ada */}
-            <img
-              src={category.imageurl}
-              className="object-contain w-20 h-20 mix-blend-multiply"
-              alt={category.name}
-            />
+            {/* <img
+                src={category.imageurl}
+                className="object-contain w-20 h-20 mix-blend-multiply"
+                alt={category.name}
+              /> */}
           </div>
         </CardContent>
       </Card>

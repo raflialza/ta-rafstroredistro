@@ -1,24 +1,21 @@
 import { DeleteCartButton } from "@/components/delete-cart-button";
+import { UpdateCartQuantity } from "@/components/update-cart-quantity"; // 👈 1. Import komponen barunya
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
 
 export default async function CartPage() {
-  // 1. Inisialisasi Supabase dan cek user
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Jika belum login, tendang ke halaman login
   if (!user) {
     redirect("/auth/login");
   }
 
-  // 2. Ambil data keranjang beserta info produknya dari database
   const { data: cartItems } = await supabase
     .from("cart_items")
     .select(
@@ -37,11 +34,10 @@ export default async function CartPage() {
     )
     .eq("user_id", user.id);
 
-  // 3. Fungsi untuk menghitung total harga
   const calculateTotal = () => {
     return (
       cartItems?.reduce((total, item) => {
-        // @ts-ignore - Supabase join typing bisa sedikit tricky
+        // @ts-ignore
         const productPrice = item.products?.price || 0;
         return total + productPrice * item.quantity;
       }, 0) || 0
@@ -57,12 +53,11 @@ export default async function CartPage() {
   };
 
   return (
-    <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8 max-w-6xl">
       <h1 className="text-3xl font-black italic mb-8 uppercase">
         Shopping Cart
       </h1>
 
-      {/* Jika keranjang ada isinya */}
       {cartItems && cartItems.length > 0 ? (
         <div className="grid lg:grid-cols-3 gap-10 items-start">
           {/* Daftar Produk di Kiri */}
@@ -99,13 +94,16 @@ export default async function CartPage() {
                     </p>
                   </div>
 
-                  {/* Qty & Tombol Hapus */}
+                  {/* 2. 👇 Panggil komponen UpdateCartQuantity di sini 👇 */}
                   <div className="flex items-center justify-between mt-4">
-                    <span className="text-sm font-medium bg-muted px-3 py-1 rounded-md">
-                      Qty: {item.quantity}
-                    </span>
+                    <UpdateCartQuantity
+                      cartItemId={item.id}
+                      initialQuantity={item.quantity}
+                    />
+
                     <DeleteCartButton cartItemId={item.id} />
                   </div>
+                  {/* -------------------------------------------------- */}
                 </div>
               </div>
             ))}
@@ -147,7 +145,6 @@ export default async function CartPage() {
           </div>
         </div>
       ) : (
-        //* Jika Keranjang Kosong *//
         <div className="text-center py-24 border-2 border-dashed rounded-2xl bg-muted/10">
           <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-4xl">🛒</span>

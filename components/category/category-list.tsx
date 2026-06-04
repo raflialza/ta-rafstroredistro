@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 
 async function getCategories() {
   const supabase = await createClient();
+
   const { data: categories } = await supabase.from("categories").select("*");
 
   // Fallback to minimal mock if table is empty or missing during setup
@@ -12,38 +13,33 @@ async function getCategories() {
         id: "mock1",
         name: "Vans Old Skool",
         slug: "old-skool",
-        description: "The original Vans model featuring a minimalist, low-top design.",
-        image_url: "/10.jpg",
+        description:
+          "The original Vans model featuring a minimalist, low-top design.",
       },
       {
         id: "mock2",
         name: "Vans Authentic",
         slug: "authentic",
-        description: "An evolution of the Authentic, specifically designed by skaters.",
-        image_url: "/1.jpg",
+        description:
+          "An evolution of the Authentic, specifically designed by skaters.",
       },
       {
         id: "mock3",
         name: "Vans Era",
         slug: "era",
         description: "The first model to debut the iconic Sidestripe.",
-        image_url: "/11.jpg",
       },
       {
         id: "mock4",
         name: "Vans Classic Slip-On",
         slug: "classic-slip-on",
-        description: "The ultimate practical design, featuring a laceless upper with elastic side accents.",
-        image_url: "/12.jpg",
+        description:
+          "The ultimate practical design, featuring a laceless upper with elastic side accents.",
       },
     ];
   }
 
-  // Handle difference in casing between mock `imageurl` and database `image_url`
-  return categories.map((c) => ({
-    ...c,
-    imageurl: c.image_url || c.imageurl, // fallback in case their type expects imageurl
-  }));
+  return categories;
 }
 
 export async function CategoryList() {
