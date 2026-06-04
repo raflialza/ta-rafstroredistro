@@ -15,7 +15,7 @@ export default async function Home(props: {
   const currentLimit = searchParams.limit
     ? parseInt(searchParams.limit, 10)
     : 10;
-
+  ``;
   return (
     <main className="min-h-screen flex flex-col items-center">
       <div className="flex-1 w-full flex flex-col gap-10 items-center">
