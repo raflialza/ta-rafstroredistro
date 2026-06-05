@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { ShoppingCart, Search, Menu } from "lucide-react";
+import { ShoppingCart, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { AuthButton } from "@/components/auth-button";
-import { Suspense } from "react";
-import { createClient } from "@/lib/supabase/server"; // Pastikan path ini benar
+import { SearchBar } from "./search-bar"; // Import SearchBar yang baru
+import { createClient } from "@/lib/supabase/server";
 import {
   Sheet,
   SheetContent,
@@ -43,7 +42,6 @@ export async function Navbar() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-sm font-medium">
-            {/* Ubah href ke /products agar mengarah ke daftar sepatu */}
             <Link
               href="/#products"
               className="relative group text-foreground/80 hover:text-foreground transition-colors"
@@ -61,17 +59,13 @@ export async function Navbar() {
           </nav>
         </div>
 
+        {/* 👇 Bagian Tengah: SearchBar Aktif 👇 */}
+        <div className="hidden lg:flex flex-1 justify-center max-w-sm px-4">
+          <SearchBar />
+        </div>
+
         {/* Bagian Kanan: Actions */}
         <div className="flex items-center gap-2 sm:gap-4">
-          <div className="hidden lg:flex relative items-center max-w-[200px]">
-            <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Cari sepatu..."
-              className="pl-9 h-10 rounded-full"
-            />
-          </div>
-
           {/* Tombol Keranjang dengan Badge Angka */}
           <Button
             variant="ghost"
@@ -91,13 +85,8 @@ export async function Navbar() {
 
           <div className="h-6 w-px bg-border mx-1 hidden sm:block"></div>
 
-          <Suspense
-            fallback={
-              <div className="h-9 w-20 bg-muted animate-pulse rounded-full" />
-            }
-          >
-            <AuthButton />
-          </Suspense>
+          {/* 👇 AuthButton tanpa Suspense untuk cegah Error Radix ID 👇 */}
+          <AuthButton />
 
           {/* Mobile Menu */}
           <Sheet>
@@ -118,17 +107,22 @@ export async function Navbar() {
               </SheetHeader>
               <div className="flex flex-col gap-6 mt-12 px-2">
                 <Link
-                  href="/products"
+                  href="/#products"
                   className="text-2xl font-bold hover:text-red-600"
                 >
                   PRODUK
                 </Link>
                 <Link
-                  href="/categories"
+                  href="/#categories"
                   className="text-2xl font-bold hover:text-red-600"
                 >
                   KATEGORI
                 </Link>
+
+                {/* Kamu juga bisa meletakkan SearchBar di dalam menu mobile jika mau */}
+                <div className="mt-8 border-t pt-8">
+                  <SearchBar />
+                </div>
               </div>
             </SheetContent>
           </Sheet>
