@@ -18,22 +18,22 @@ export default async function AdminLayout({
     redirect("/auth/login");
   }
 
-  // 2. Proteksi Admin: Cek berdasarkan email kamu ATAU metadata role
-  // Ganti "owner@rafstore.com" dengan email utama yang ingin kamu pakai sebagai admin
+  // 2. Proteksi Admin
   const isAdmin =
-    user.email === "mrafli.alzaidan1603@gmail.com" ||
+    user.email?.toLowerCase() === "mrafli.alzaidan1603@gmail.com" ||
     user.user_metadata?.role === "admin";
 
   if (!isAdmin) {
-    // Jika bukan admin, tendang langsung ke beranda pelanggan
     redirect("/");
   }
 
-  // 2. Keamanan Ekstra (Opsional): Hanya email tertentu yang boleh masuk
-  // Ganti dengan email milikmu sendiri
-  // if (user.email !== "admin@emailkamu.com") {
-  //   redirect("/");
-  // }
+  // 👇 SERVER ACTION UNTUK LOGOUT DAN REDIRECT 👇
+  const handleLogout = async () => {
+    "use server";
+    const supabaseClient = await createClient();
+    await supabaseClient.auth.signOut();
+    redirect("/auth/login");
+  };
 
   return (
     <div className="min-h-screen flex bg-zinc-50">
@@ -64,13 +64,16 @@ export default async function AdminLayout({
           </Link>
         </nav>
 
+        {/* 👇 BAGIAN BAWAH SIDEBAR: Diubah dari Link menjadi Form Logout 👇 */}
         <div className="p-4 border-t">
-          <Link
-            href="/"
-            className="flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm font-bold transition-colors"
-          >
-            <LogOut className="h-5 w-5" /> Kembali ke Toko
-          </Link>
+          <form action={handleLogout}>
+            <button
+              type="submit"
+              className="flex items-center gap-3 w-full px-3 py-2.5 text-red-600 hover:bg-red-50 rounded-lg text-sm font-bold transition-colors text-left focus:outline-none"
+            >
+              <LogOut className="h-5 w-5" /> Logout
+            </button>
+          </form>
         </div>
       </aside>
 

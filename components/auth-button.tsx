@@ -10,20 +10,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, LayoutDashboard } from "lucide-react";
 
 export async function AuthButton() {
   const supabase = await createClient();
 
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+  // Menggunakan getUser() yang valid dan sinkron dengan navbar serta layout
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // Mengambil huruf pertama dari email untuk dijadikan inisial
+  // Mengambil huruf pertama dari email untuk dijadikan inisial avatar
   const initial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
+
+  // Cek hak akses admin (Gunakan toLowerCase() untuk menghindari error typo kapital)
+  const isAdmin =
+    user?.email?.toLowerCase() === "mrafli.alzaidan1603@gmail.com" ||
+    user?.user_metadata?.role === "admin";
 
   return user ? (
     <div className="flex items-center gap-4">
-      {/* 1. Tombol Pesanan Saya (Tetap di luar sesuai kode aslimu) */}
+      {/* Tombol Pesanan Saya (Tetap berada di luar) */}
       <Button
         asChild
         variant="ghost"
@@ -33,17 +40,16 @@ export async function AuthButton() {
         <Link href="/orders">Pesanan Saya</Link>
       </Button>
 
-      {/* 2. Avatar Inisial yang sekarang menjadi Dropdown */}
+      {/* Avatar Inisial dengan Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          {/* Tombol inisial dipertahankan gaya CSS aslinya */}
           <button className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-sm font-bold text-white uppercase hover:ring-2 hover:ring-red-600 hover:ring-offset-2 transition-all focus:outline-none">
             {initial}
           </button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-64 p-2">
-          {/* Label Email */}
+          {/* Label Email Informasi Akun */}
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">Akun Saya</p>
@@ -55,7 +61,23 @@ export async function AuthButton() {
 
           <DropdownMenuSeparator />
 
-          {/* Opsi Tambah Akun (Sekarang mengarah ke halaman Login) */}
+          {/* MENU KHUSUS ADMIN: Hanya tampil jika email cocok atau role admin di-set */}
+          {isAdmin && (
+            <>
+              <DropdownMenuItem
+                asChild
+                className="cursor-pointer py-3 text-red-600 font-bold focus:bg-red-50 focus:text-red-700"
+              >
+                <Link href="/admin" className="flex items-center w-full">
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  <span>Dashboard Admin</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+
+          {/* Opsi Tambah Akun / Switch Akun */}
           <DropdownMenuItem asChild className="cursor-pointer py-3">
             <Link href="/auth/login" className="flex items-center w-full">
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -65,7 +87,7 @@ export async function AuthButton() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* 3. Tombol Logout (Tetap di luar) */}
+      {/* Tombol Logout (Tetap berada di luar) */}
       <LogoutButton />
     </div>
   ) : (
