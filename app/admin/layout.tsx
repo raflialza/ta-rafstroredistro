@@ -13,9 +13,20 @@ export default async function AdminLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 1. Keamanan: Cek apakah user sudah login
+  // 1. Cek apakah user sudah login
   if (!user) {
     redirect("/auth/login");
+  }
+
+  // 2. Proteksi Admin: Cek berdasarkan email kamu ATAU metadata role
+  // Ganti "owner@rafstore.com" dengan email utama yang ingin kamu pakai sebagai admin
+  const isAdmin =
+    user.email === "mrafli.alzaidan1603@gmail.com" ||
+    user.user_metadata?.role === "admin";
+
+  if (!isAdmin) {
+    // Jika bukan admin, tendang langsung ke beranda pelanggan
+    redirect("/");
   }
 
   // 2. Keamanan Ekstra (Opsional): Hanya email tertentu yang boleh masuk
