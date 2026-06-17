@@ -15,11 +15,11 @@ export default async function AdminDashboard() {
     .from("orders")
     .select("*", { count: "exact", head: true });
 
-  // 3. Hitung Total Pendapatan (Hanya dari pesanan yang sukses/dibayar)
+  // 3. Hitung Total Pendapatan (Cocokkan dengan status Webhook: "paid", "shipped", "completed")
   const { data: paidOrders } = await supabase
     .from("orders")
     .select("total_amount")
-    .in("status", ["settlement", "success", "capture"]); // Status sukses dari Midtrans
+    .in("status", ["paid", "shipped", "completed"]);
 
   const totalRevenue =
     paidOrders?.reduce((sum, order) => sum + Number(order.total_amount), 0) ||
@@ -100,14 +100,6 @@ export default async function AdminDashboard() {
             </p>
           </CardContent>
         </Card>
-      </div>
-
-      <div className="mt-12 p-8 border-2 border-dashed rounded-2xl text-center text-muted-foreground bg-white">
-        <h3 className="font-bold text-xl mb-2">Area Kerja Admin</h3>
-        <p>
-          Pilih menu "Kelola Pesanan" di samping untuk memproses resi
-          pengiriman, atau "Kelola Produk" untuk menambah stok sepatu baru.
-        </p>
       </div>
     </div>
   );
