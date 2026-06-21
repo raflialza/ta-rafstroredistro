@@ -15,15 +15,26 @@ export default async function AdminDashboard() {
     .from("orders")
     .select("*", { count: "exact", head: true });
 
-  // 3. Hitung Total Pendapatan (Cocokkan dengan status Webhook: "paid", "shipped", "completed")
+  // 3. Hitung Total Pendapatan HANYA dari semua order yang sudah "paid"
   const { data: paidOrders } = await supabase
     .from("orders")
     .select("total_amount")
-    .in("status", ["paid", "shipped", "completed"]);
+    .eq("status", "paid");
 
+  // Menjumlahkan semua total_amount dari seluruh transaksi paid yang ada
   const totalRevenue =
     paidOrders?.reduce((sum, order) => sum + Number(order.total_amount), 0) ||
     0;
+
+  // 👇 TAMBAHAN CONSOLE LOG UNTUK DEBUGGING 👇
+  console.log(" ");
+  console.log("=== 🚀 DEBUG DATA DASHBOARD ADMIN 🚀 ===");
+  console.log("Total Produk di Database:", productsCount);
+  console.log("Total Pesanan Masuk (Semua):", ordersCount);
+  console.log("Isi Data Pesanan [Paid]:", paidOrders);
+  console.log("Total Pendapatan Terhitung:", totalRevenue);
+  console.log("========================================");
+  console.log(" ");
 
   const formatIDR = (price: number) => {
     return new Intl.NumberFormat("id-ID", {

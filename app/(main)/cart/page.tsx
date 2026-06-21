@@ -154,7 +154,7 @@ export default async function CartPage() {
             Sepertinya kamu belum menambahkan sepatu impianmu ke keranjang. Yuk,
             jelajahi koleksi kami sekarang!
           </p>
-          <Link href="/products">
+          <Link href="/#products">
             <Button className="h-12 px-8 font-bold text-base rounded-full bg-red-600 hover:bg-red-700">
               Mulai Belanja
             </Button>
