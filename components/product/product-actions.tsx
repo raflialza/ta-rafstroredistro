@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 // Daftar ukuran sepatu standar (Kamu bisa mengubahnya nanti jika ada di database)
 const SIZES = ["39", "40", "41", "42", "43", "44"];
 
-export function ProductActions({ productId }: { productId: string }) {
+export function ProductActions({ productId, sizes }: { productId: string; sizes?: any[] }) {
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -81,7 +81,7 @@ export function ProductActions({ productId }: { productId: string }) {
           </span>
         </div>
         <div className="flex flex-wrap gap-3">
-          {SIZES.map((size) => (
+          {(sizes && sizes.length > 0 ? sizes.map((s) => String(s.size)) : SIZES).map((size) => (
             <button
               key={size}
               onClick={() => setSelectedSize(size)}

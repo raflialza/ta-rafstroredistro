@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { OrdersClient } from "./orders-client";
+import  OrdersClient  from "./orders-client";
 
 export default async function OrdersPage() {
   const supabase = await createClient();
@@ -28,7 +28,7 @@ export default async function OrdersPage() {
       <h1 className="text-3xl font-black italic uppercase tracking-tighter mb-8">
         Riwayat Pesanan
       </h1>
-      <OrdersClient orders={orders || []} />
+      <OrdersClient initialOrders={orders || []} />
     </div>
   );
 }

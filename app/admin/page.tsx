@@ -15,11 +15,11 @@ export default async function AdminDashboard() {
     .from("orders")
     .select("*", { count: "exact", head: true });
 
-  // 3. Hitung Total Pendapatan HANYA dari semua order yang sudah "paid"
+  // 3. Hitung Total Pendapatan HANYA dari semua order yang sudah dibayar (termasuk diproses, dikirim, dan selesai)
   const { data: paidOrders } = await supabase
     .from("orders")
     .select("total_amount")
-    .eq("status", "paid");
+    .in("status", ["paid", "processing", "shipped", "completed", "refund_requested", "refund_rejected"]);
 
   // Menjumlahkan semua total_amount dari seluruh transaksi paid yang ada
   const totalRevenue =

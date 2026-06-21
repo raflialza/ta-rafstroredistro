@@ -111,6 +111,16 @@ export async function POST(req: Request) {
       );
     }
 
+    // 5. Kosongkan keranjang belanja user setelah pesanan berhasil dibuat
+    const { error: clearCartError } = await supabase
+      .from("cart_items")
+      .delete()
+      .eq("user_id", user.id);
+
+    if (clearCartError) {
+      console.error("Gagal mengosongkan keranjang:", clearCartError);
+    }
+
     // Process Midtrans Snap Token
     const parameter = {
       transaction_details: {
@@ -130,15 +140,20 @@ export async function POST(req: Request) {
     const transaction = await snap.createTransaction(parameter);
 
     // Save the snap token to the order so user can retry payment later
-    const { error: updateError } = await supabase
+    // Menggunakan service_role untuk memotong RLS (Bypass RLS)
+    const { createClient: createSupabaseClient } = require("@supabase/supabase-js");
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { error: updateError } = await supabaseAdmin
       .from("orders")
       .update({ snap_token: transaction.token })
       .eq("id", order.id);
 
     if (updateError) {
       console.error("Error saving snap token:", updateError);
-      // We don't necessarily want to fail the whole checkout if just the token update fails,
-      // but it will log an error.
     }
 
     return NextResponse.json({ token: transaction.token, orderId: order.id });

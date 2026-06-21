@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Package, ShoppingCart, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
+import { AdminNav } from "./admin-nav";
 
 export default async function AdminLayout({
   children,
@@ -43,26 +44,7 @@ export default async function AdminLayout({
           RAFSTORE<span className="text-red-600">ADMIN</span>
         </div>
 
-        <nav className="flex-1 py-6 px-4 space-y-2">
-          <Link
-            href="/admin"
-            className="flex items-center gap-3 px-3 py-2.5 bg-zinc-100 rounded-lg text-sm font-bold transition-colors"
-          >
-            <LayoutDashboard className="h-5 w-5" /> Dashboard
-          </Link>
-          <Link
-            href="/admin/orders"
-            className="flex items-center gap-3 px-3 py-2.5 hover:bg-zinc-100 text-muted-foreground hover:text-foreground rounded-lg text-sm font-bold transition-colors"
-          >
-            <ShoppingCart className="h-5 w-5" /> Kelola Pesanan
-          </Link>
-          <Link
-            href="/admin/products"
-            className="flex items-center gap-3 px-3 py-2.5 hover:bg-zinc-100 text-muted-foreground hover:text-foreground rounded-lg text-sm font-bold transition-colors"
-          >
-            <Package className="h-5 w-5" /> Kelola Produk
-          </Link>
-        </nav>
+        <AdminNav />
 
         {/* 👇 BAGIAN BAWAH SIDEBAR: Diubah dari Link menjadi Form Logout 👇 */}
         <div className="p-4 border-t">

@@ -134,8 +134,9 @@ export function CheckoutClient({
         },
         onClose: function () {
           console.log("customer closed the popup");
-          alert("Anda menutup popup sebelum menyelesaikan pembayaran.");
+          alert("Anda menutup popup sebelum menyelesaikan pembayaran. Anda dapat melanjutkannya nanti di menu Pesanan.");
           setIsLoading(false);
+          window.location.href = "/orders";
         },
       });
     } catch (error: any) {
