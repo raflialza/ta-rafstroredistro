@@ -1,26 +1,34 @@
-// 1. Tambahkan import ProductActions
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { ProductActions } from "@/components/product/product-actions";
 
+// 1. Ubah tipe params menjadi Promise
 export default async function ProductDetailPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
+  // 2. WAJIB: Await params sebelum mengambil nilainya
+  const resolvedParams = await params;
+  const slug = resolvedParams.slug;
+
   const supabase = await createClient();
 
-  // Mengambil data produk berdasarkan slug
-  const { data: product } = await supabase
+  // 3. Gunakan 'slug' yang sudah di-resolve ke database
+  const { data: product, error } = await supabase
     .from("products")
     .select("*")
-    .eq("slug", params.slug)
+    .eq("slug", slug)
     .single();
 
+  // Jika produk benar-benar tidak ada di database
   if (!product) {
     return (
-      <div className="text-center py-20 text-2xl font-bold">
-        Produk tidak ditemukan
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+        <h1 className="text-3xl font-bold">Produk tidak ditemukan</h1>
+        <p className="text-gray-500">
+          Cek kembali URL atau kembali ke halaman produk.
+        </p>
       </div>
     );
   }
@@ -58,10 +66,7 @@ export default async function ProductDetailPage({
           <p>{product.description || "Deskripsi produk belum tersedia."}</p>
         </div>
 
-        {/* 
-          2. INTEGRASI KOMPONEN INTERAKTIF 
-          Menggantikan tombol statis dengan komponen ProductActions milikmu 
-        */}
+        {/* INTEGRASI KOMPONEN KERANJANG */}
         <div className="-mt-4">
           <ProductActions productId={product.id} />
         </div>
