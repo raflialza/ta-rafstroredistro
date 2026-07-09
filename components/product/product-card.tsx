@@ -1,72 +1,52 @@
-import Link from "next/link";
+// components/product/product-card.tsx
 import Image from "next/image";
-import { ImageIcon } from "lucide-react"; // Import ikon untuk fallback
 
-export interface Product {
-  id: string;
-  brand: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  imageUrl?: string | null; // Ubah tipe data agar mengizinkan null atau kosong
-  slug: string;
+// Sesuaikan interface ini dengan struktur data produk kamu
+interface ProductCardProps {
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    image: string;
+  };
+  onAddToCart: (product: any) => void;
 }
 
-export function ProductCard({ product }: { product: Product }) {
-  const formatIDR = (price: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(price);
-  };
-
+export default function ProductCard({
+  product,
+  onAddToCart,
+}: ProductCardProps) {
   return (
-    <Link
-      href={`/products/${product.slug}`}
-      className="group flex flex-col gap-3 cursor-pointer"
-    >
-      {/* Container Gambar */}
-      <div className="relative aspect-square w-full bg-muted/40 rounded-lg overflow-hidden flex items-center justify-center transition-transform group-hover:scale-[1.02]">
-        {/* Pengecekan: Jika ada imageUrl, tampilkan gambar. Jika tidak, tampilkan fallback */}
-        {product.imageUrl ? (
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-            className="object-contain p-4 mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center text-muted-foreground opacity-50 transition-opacity group-hover:opacity-80">
-            <ImageIcon className="h-12 w-12 mb-2" strokeWidth={1.5} />
-            <span className="text-[10px] font-semibold uppercase tracking-widest">
-              Belum Ada Gambar
-            </span>
-          </div>
-        )}
+    <div className="flex flex-col h-full border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      {/* 
+        FIX: Container ini mengunci aspek rasio (kotak sempurna).
+        'relative' dan 'aspect-square' mencegah gambar bergeser saat UI berubah.
+      */}
+      <div className="relative w-full aspect-square overflow-hidden bg-gray-100">
+        <Image
+          src={product.image}
+          alt={product.name}
+          fill
+          className="object-cover transition-transform duration-300 hover:scale-105"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
       </div>
 
-      {/* Detail Produk */}
-      <div className="flex flex-col space-y-1">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          {product.brand}
-        </span>
-        <h3 className="text-sm font-semibold leading-tight line-clamp-2 min-h-[2.5rem]">
-          {product.name}
-        </h3>
+      {/* Konten bawah dengan flex-grow agar tombol selalu rata bawah */}
+      <div className="p-4 flex flex-col flex-grow">
+        <h3 className="text-lg font-semibold truncate">{product.name}</h3>
+        <p className="text-gray-600 mb-4">
+          Rp {product.price.toLocaleString("id-ID")}
+        </p>
 
-        <div className="flex items-center gap-2 pt-1">
-          <span className="text-sm font-bold text-[#10b981]">
-            {formatIDR(product.price)}
-          </span>
-          {product.originalPrice && (
-            <span className="text-xs font-medium text-muted-foreground line-through decoration-muted-foreground/50">
-              {formatIDR(product.originalPrice)}
-            </span>
-          )}
-        </div>
+        {/* mt-auto memastikan tombol selalu berada di posisi paling bawah kartu */}
+        <button
+          onClick={() => onAddToCart(product)}
+          className="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors font-medium"
+        >
+          Tambah ke Keranjang
+        </button>
       </div>
-    </Link>
+    </div>
   );
 }
