@@ -1,87 +1,39 @@
 import Image from "next/image";
-import { notFound } from "next/navigation";
-import { ProductActions } from "./product-actions";
-// 1. Import Supabase Client khusus untuk komponen server
-import { createClient } from "@/lib/supabase/server"; // <-- Pastikan ini adalah client untuk server, bukan untuk client-side
 
-interface ProductDetailProps {
-  slug: string;
-}
-
-export async function ProductDetail({ slug }: ProductDetailProps) {
-  // 2. Inisialisasi koneksi ke Supabase
-  const supabase = await createClient();
-
-  // 3. Ambil data asli dari tabel "products" beserta stok per ukurannya
-  const { data: product, error } = await supabase
-    .from("products")
-    .select(`
-      *,
-      product_sizes (
-        size,
-        stock
-      )
-    `)
-    .eq("slug", slug)
-    .single();
-
-  // Jika error dari database atau produk tidak ditemukan
-  if (error || !product) {
-    console.error("Error fetching product:", error);
-    notFound();
-  }
-
-  // Format harga
-  const formatIDR = (price: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(price);
-  };
-
+export function ProductDetail({ product }: { product: any }) {
   return (
-    <div className="grid md:grid-cols-2 gap-10 items-start">
-      {/* Gambar Produk */}
-      <div className="bg-[#f8f9fa] rounded-xl p-8 flex justify-center items-center relative aspect-square">
-        {/* Catatan: Jika di Supabase nama kolom gambarmu adalah 'image_url', 
-            ganti product.imageUrl di bawah ini menjadi product.image_url */}
-        <img
-          src={product.imageUrl || product.image_url}
+    // Menggunakan grid: 1 kolom di HP, 2 kolom di Desktop (md)
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 md:p-8">
+      {/* KIRI: Container Gambar */}
+      {/* 'relative' pada mobile membuat gambar ikut scroll normal */}
+      {/* 'md:sticky md:top-20' membuat gambar diam di samping saat desktop di-scroll */}
+      <div className="relative md:sticky md:top-20 w-full aspect-square overflow-hidden rounded-xl bg-gray-100">
+        <Image
+          src={product.image_url || "/placeholder.jpg"}
           alt={product.name}
-          className="w-full h-full object-contain mix-blend-multiply"
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 50vw"
+          priority
         />
       </div>
 
-      {/* Info Produk */}
+      {/* KANAN: Informasi Produk */}
       <div className="flex flex-col gap-4">
-        <h2 className="text-muted-foreground font-semibold tracking-widest uppercase">
-          {product.brand}
-        </h2>
-        <h1 className="text-3xl md:text-4xl font-bold">{product.name}</h1>
+        <h1 className="text-3xl font-bold">{product.name}</h1>
+        <p className="text-2xl font-semibold text-gray-800">
+          Rp {product.price?.toLocaleString("id-ID")}
+        </p>
 
-        <div className="flex items-center gap-4 mt-2">
-          <span className="text-2xl font-bold text-[#10b981]">
-            {formatIDR(product.price)}
-          </span>
-          {/* Catatan: Sama seperti gambar, jika di DB pakai 'original_price', ganti kode di bawah */}
-          {(product.originalPrice || product.original_price) && (
-            <span className="text-lg text-muted-foreground line-through">
-              {formatIDR(product.originalPrice || product.original_price)}
-            </span>
-          )}
+        {/* Deskripsi & Konten Lainnya */}
+        <div className="prose max-w-none">
+          <p>{product.description}</p>
         </div>
 
-        {/* Tombol Add to Cart & Pilihan Size */}
-        {/* Pastikan product.id di bawah ini sesuai dengan primary key di Supabase-mu */}
-        <ProductActions
-          productId={product.id}
-          sizes={
-            product.product_sizes && product.product_sizes.length > 0 
-              ? product.product_sizes.sort((a: any, b: any) => a.size - b.size) 
-              : []
-          }
-        />
+        {/* Area Tombol Checkout/Cart */}
+        <div className="mt-6">
+          {/* Tambahkan komponen keranjang atau ukuran di sini */}
+        </div>
       </div>
     </div>
   );
